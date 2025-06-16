@@ -8,6 +8,7 @@ import { databaseConnecting } from './app/config/database.config';
 import config from './app/config';
 import notFound from './app/middlewares/notFound';
 import globalErrorHandler from './app/middlewares/globalErrorhandler';
+import router from './app/routes';
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -66,6 +67,9 @@ const startServer = (req: Request, res: Response) => {
   }
 };
 app.get('/', startServer);
+
+
+app.use('/api/v1', router);
 
 // Importing routes
 app.use(notFound);
