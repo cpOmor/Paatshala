@@ -6,6 +6,8 @@ import http from 'http';
 import cookieParser from 'cookie-parser';
 import { databaseConnecting } from './app/config/database.config';
 import config from './app/config';
+import notFound from './app/middlewares/notFound';
+import globalErrorHandler from './app/middlewares/globalErrorhandler';
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -65,6 +67,9 @@ const startServer = (req: Request, res: Response) => {
 };
 app.get('/', startServer);
 
+// Importing routes
+app.use(notFound);
+app.use(globalErrorHandler);
 
 
 server.listen(config.port, () => {
