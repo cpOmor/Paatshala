@@ -90,9 +90,6 @@ const loginUser = async (payload: TLoginUser) => {
 };
 
 const logoutUser = async (req: any, data: any) => {
-  // const token = req.cookies.refreshToken;
-  // const token = req.headers.authorization;
-
   const token = req.cookies.refreshToken;
 
   if (!token) {
@@ -483,33 +480,19 @@ const setNewPassword = async (token: string, password: string) => {
 };
 
 const changePassword = async (req: any) => {
-  // const token = req.headers.authorization;
+  // Check if the user is authenticated
   const token = req.cookies.refreshToken;
-  const payload = req.body;
-  // const token = req.cookies.refreshToken;
-
   if (!token) {
     throw forbidden('Something went wrong');
   }
+  const payload = req.body;
 
   const decoded = jwt.verify(
     token,
     config.jwt_access_secret as string,
   ) as JwtPayload;
 
-  // checking if the user is exist
-  const user = await User.findOne({ email: decoded?.email }).select(
-    '+password',
-  );
 
-  if (!user) {
-    throw notFound('User not found!');
-  }
-
-  const userStatus = user?.status;
-  if (userStatus === UserStatus.blocked) {
-    throw forbidden('The user has been blocked!');
-  }
 
   //hash new password
   const hashedPassword = await bcrypt.hash(
@@ -517,15 +500,8 @@ const changePassword = async (req: any) => {
     Number(config.bcrypt_salt_rounds),
   );
 
-  const passwordMatch = await bcrypt.compare(
-    payload.oldPassword,
-    user?.password,
-  );
 
-  if (!passwordMatch) {
-    throw forbidden('Please provide the correct information.');
-  }
-
+// update user password
   await User.findOneAndUpdate(
     {
       email: decoded.email,

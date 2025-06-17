@@ -9,49 +9,80 @@ const router = express.Router();
 
 
 
-// Route: Login a user and return an access token
+/**
+ * This route handles user login.
+ * It expects a request body with user credentials (e.g., email and password).
+ * If the credentials are valid, it returns an access token.
+ */
 router.post(
   '/login',
-  validateRequest(AuthValidation.loginValidationSchema), // Validates the login request body (e.g., email and password)
-  AuthControllers.loginUser, // Controller handles the login logic
+  validateRequest(AuthValidation.loginValidationSchema),
+  AuthControllers.loginUser,
 );
 
-// Route: Log out a user by clearing tokens or sessions
-router.post('/logout', AuthControllers.logoutUser); // Controller handles logout logic
+/**
+ * This route handles user logout.
+ * It typically clears the user's session or access token.
+ * It does not require any request body.
+ */
+router.post('/logout', AuthControllers.logoutUser); 
 
-// Route: Refresh access token using a refresh token
+
+/**
+ * This route handles refresh token.
+ * It expects a request body with a valid refresh token.
+ * If the refresh token is valid, it generates a new access token.
+ */
 router.post(
   '/refresh-token',
-  validateRequest(AuthValidation.refreshTokenValidationSchema), // Validates the refresh token request
-  AuthControllers.refreshToken, // Controller generates a new access token
+  validateRequest(AuthValidation.refreshTokenValidationSchema),
+  AuthControllers.refreshToken,
 );
 
-// Route: Verify a user's account using a verification code
-// This is typically used after registration to confirm the user's email
-// code expire time is 5 minutes
+
+/**
+ * This route handles user email verification.
+ * It expects a request body with a verification code sent to the user's email.
+ * If the code is valid, it verifies the user's account.
+ */
 
 router.post(
   '/verification',
-  // validateRequest(AuthValidation.verificationSchema), // Optional: Validate the verification request body
-  AuthControllers.verification, // Controller verifies the user's account
+  AuthControllers.verification,
 );
 
-// Route: Request a password reset (forget password)
+
+/**
+ * This route handles forget password.
+ * It expects a request body with the user's email.
+ * If the email is registered, it sends a password reset code to the user's email.
+ */
 router.post(
   '/forget-password',
-  AuthControllers.forgerPassword, // Controller handles sending a password reset email or code
+  AuthControllers.forgerPassword,
 );
 
-// Route: Verify the code sent for password reset
+
+/**
+ * This route handles the verification of the forget password code.
+ * It expects a request body with the reset password code sent to the user's email.
+ * If the code is valid, it allows the user to set a new password.
+ * This route is typically used after the user has requested a password reset.
+ */
 router.put(
-  '/new-password-verification',
+  '/forget-password-verification',
   AuthControllers.verificationForgetPassword, // Controller verifies the reset password code
 );
 
-// Route: Set a new password after verification
+/**
+ * This route allows the user to set a new password.
+ * It expects a request body with the new password and set cookies validation.
+ * If the request is valid, it updates the user's password.
+ * This route is typically used after the user has verified their forget password code.
+ */
 router.post(
   '/set-new-password',
-  AuthControllers.setNewPassword, // Controller allows the user to set a new password
+  AuthControllers.setNewPassword,
 );
 
 // Route: Resend the account verification code
@@ -59,14 +90,20 @@ router.post(
 // or if it has expired
 router.put(
   '/resend-verification-code',
-  AuthControllers.verificationCodeReSend, // Controller resends a new verification code to the user
+  AuthControllers.verificationCodeReSend,
 );
 
-// Route: Change the password for logged-in users
+/**
+ * This route allows authenticated users to change their password.
+ * It requires the user to be authenticated and have a valid role (admin, student, or teacher).
+ * It expects a request body with the current password and the new password.
+ * If the current password is correct, it updates the user's password.
+ * This route is typically used by users who want to change their password after logging in.
+ */
 router.put(
   '/change-password',
-  auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher ), // Middleware ensures the user is authenticated and has the required role
-  AuthControllers.changePassword, // Controller updates the user's password
+  auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher ),
+  AuthControllers.changePassword,
 );
 
 

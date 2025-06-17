@@ -1,13 +1,13 @@
 how can clone the repository
 
 ```bash
-git clone https://github.com/OmarDevZon/sms-server.git
+git clone https://github.com/cpOmor/Paatshala.git
 ```
 
 goto file
 
 ```bash
-cd sms-server
+cd Paatshala
 ```
 
 ```bash
@@ -23,19 +23,123 @@ http://localhost:5000/
 ```
 
 ### user account create url
-
+##### POST method
 ```bash
 {{base_url}}/user/create-user
 ```
 
-### login user url
+#### Data 
+```bash
+{
+    "email": "",
+    "firstName": "",
+    "lastName": "",
+    "phone": "",
+    "alterNumber": "",
+    "password": ""
+}
+```
 
+### login user url
+##### POST method
 ```bash
 {{base_url}}/auth/login
 ```
+#### Data 
+```bash
+{
+    "email": "",
+    "password": ""
+}
+```
+
+
+### Logout user
+##### POST method
+```bash
+{{base_url}}/auth/logout
+``` 
+
+
+### User Verification
+##### POST method
+```bash
+{{base_url}}/auth/verification
+```
+#### Data 
+```bash
+{
+    "email": "",
+    "code": ""
+}
+```
+
+
+### Forget password
+##### POST method
+```bash
+{{base_url}}/auth/forget-password
+```
+#### Data 
+```bash
+{
+    "email": ""
+}
+```
+
+
+### Forget password verification code
+##### PUT method
+```bash
+{{base_url}}/auth/forget-password-verification
+```
+#### Data 
+```bash
+{
+    "email": "",
+    "code" : ""
+}
+```
+
+
+
+### Set new password
+##### POST method
+```bash
+{{base_url}}/auth/set-new-password
+```
+#### Data 
+```bash
+{
+    "password": ""
+}
+```
+
+
+### Resent verification code
+##### POST method
+```bash
+{{base_url}}/auth/resend-verification-code
+```
+
+
+
+### Change password
+##### POST method
+```bash
+{{base_url}}/auth/change-password
+```
+#### Data 
+```bash
+{
+    "newPassword": ""
+}
+```
+
+
+
 
 ### find all user
-
 ```bash
 {{base_url}}/user
 ```

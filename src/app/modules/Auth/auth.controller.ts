@@ -91,6 +91,8 @@ const verification = catchAsync(async (req, res) => {
 const setNewPassword = catchAsync(async (req, res) => {
   const validation = await req.cookies.validation;
 
+  console.log('validation', validation);
+
   const result = await AuthServices.setNewPassword(
     validation,
     req.body.password,
