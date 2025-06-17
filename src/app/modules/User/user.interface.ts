@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose';
-import { USER_ROLE } from './user.constant';
 import { BaseType } from '../../utils/utils.interface';
+import { TUserRole, TUserStatus } from '../Auth/auth.utils';
 
 export type TVerification = BaseType & {
   code: string;
@@ -13,14 +13,12 @@ export type TUser = BaseType & {
   profileId: Schema.Types.ObjectId;
   email: string;
   alterNumber: string;
-  role: 'user' | 'admin';
+  role: TUserRole;
   password: string;
-  status: 'in-progress' | 'blocked';
+  status: TUserStatus;
   verification?: TVerification;
   rememberPassword: boolean;
 };
-
-
 
 // Represents a profile type.
 export type TProfile = BaseType & {
@@ -30,5 +28,3 @@ export type TProfile = BaseType & {
   email: string;
   image?: string;
 };
-
-export type TUserRole = keyof typeof USER_ROLE;

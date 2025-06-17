@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { TProfile, TUser } from './user.interface';
+import { USER_ROLE, UserStatus } from '../Auth/auth.utils';
 
 const userSchema = new Schema<TUser & TProfile>(
   {
@@ -19,14 +20,14 @@ const userSchema = new Schema<TUser & TProfile>(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
+      enum: Object.values(USER_ROLE),
+      default: USER_ROLE.student,
       trim: true,
     },
     status: {
       type: String,
-      enum: ['blocked', 'in-progress'],
-      default: 'in-progress',
+      enum: Object.values(UserStatus),
+      default: UserStatus.inProgress,
       trim: true,
     },
     password: {

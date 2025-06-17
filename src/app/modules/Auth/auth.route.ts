@@ -65,7 +65,7 @@ router.put(
 // Route: Change the password for logged-in users
 router.put(
   '/change-password',
-  auth(USER_ROLE.admin, USER_ROLE.user), // Middleware ensures the user is authenticated and has the required role
+  auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher ), // Middleware ensures the user is authenticated and has the required role
   AuthControllers.changePassword, // Controller updates the user's password
 );
 

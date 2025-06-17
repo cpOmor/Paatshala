@@ -4,7 +4,7 @@ import config from '../config';
 import catchAsync from '../utils/catchAsync';
 import { forbidden, notFound, unauthorized } from '../utils/errorfunc';
 import { User } from '../modules/User/user.model';
-import { TUserRole } from '../modules/User/user.interface';
+import { TUserRole, UserStatus } from '../modules/Auth/auth.utils';
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -13,7 +13,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
     // checking if the token is missing
     if (!token) {
-      throw unauthorized('Please log in!');
+      throw unauthorized('Please login!');
     }
 
 
@@ -43,11 +43,11 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
 
     // Check user status
-    if (user.status === 'blocked') {
+    if (user.status === UserStatus.blocked) {
       throw forbidden('The user has been blocked!');
     }
 
-    if (user.status !== 'in-progress') {
+    if (user.status !== UserStatus.inProgress) {
       throw forbidden('The user has been blocked!');
     } 
 

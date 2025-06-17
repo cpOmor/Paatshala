@@ -10,6 +10,7 @@ import { IMyRequest } from '../../utils/decoded';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { hashedPassword } from '../../utils/hashedPassword';
 import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
+import { USER_ROLE, UserStatus } from '../Auth/auth.utils';
 
 // Get a single user
 const getUser = async (id: string) => {
@@ -81,16 +82,16 @@ const createUser = async (payload: TUser & TProfile) => {
     const userProfile = await Profile.create([newProfile], { session });
 
     const expired = new Date();
-    expired.setMinutes(expired.getMinutes() + 2);
+    expired.setMinutes(expired.getMinutes() + 5); // Set expiration to 5 minutes from now
 
     const newUserInfo: TUser = {
       profileId: userProfile[0]?._id as Schema.Types.ObjectId,
       email: payload.email as string,
       alterNumber: payload.alterNumber as string,
-      role: 'user',
+      role: USER_ROLE.student,
       password,
       rememberPassword: false,
-      status: 'in-progress',
+      status: UserStatus.inProgress,
       verification: { code, verification: false, expired },
     };
 

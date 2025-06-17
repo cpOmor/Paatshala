@@ -17,6 +17,7 @@ import { TProfile, TUser, TVerification } from '../User/user.interface';
 import { generateUniqueCode } from '../../utils/generateUniqueCode';
 import { TEmailInfo } from '../../utils/utils.interface';
 import sendEmail from '../../utils/sendEmail';
+import { UserStatus } from './auth.utils';
 
 const loginUser = async (payload: TLoginUser) => {
   const user = await User.findOne({ email: payload.email }).select('+password');
@@ -37,11 +38,11 @@ const loginUser = async (payload: TLoginUser) => {
   }
 
   const userStatus = user?.status;
-  if (userStatus === 'blocked') {
+  if (userStatus === UserStatus.blocked) {
     throw forbidden('The account has been blocked.');
   }
 
-  if (user?.status !== 'in-progress') {
+  if (user?.status !== UserStatus.inProgress) {
     throw forbidden('Please provide the correct password.');
   }
 
@@ -123,10 +124,10 @@ const refreshToken = async (req: any, res: any) => {
   }
 
   const userStatus = user?.status;
-  if (userStatus === 'blocked') {
+  if (userStatus === UserStatus.blocked) {
     throw forbidden('Please provide the correct password.');
   }
-  if (user.status !== 'in-progress') {
+  if (user.status !== UserStatus.inProgress) {
     throw forbidden('Please provide the correct password.');
   }
 
@@ -187,7 +188,7 @@ const forgerPassword = async (email: string) => {
   // checking if the user is blocked
   const userStatus = user?.status;
 
-  if (userStatus === 'blocked') {
+  if (userStatus === UserStatus.blocked) {
     throw forbidden('This use was blocked.');
   }
 
@@ -454,7 +455,7 @@ const setNewPassword = async (token: string, password: string) => {
 
   const userStatus = user?.status;
 
-  if (userStatus === 'blocked') {
+  if (userStatus === UserStatus.blocked) {
     throw forbidden('The user has been blocked!');
   }
 
@@ -506,7 +507,7 @@ const changePassword = async (req: any) => {
   }
 
   const userStatus = user?.status;
-  if (userStatus === 'blocked') {
+  if (userStatus === UserStatus.blocked) {
     throw forbidden('The user has been blocked!');
   }
 
