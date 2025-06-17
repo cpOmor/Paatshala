@@ -6,7 +6,6 @@ const userSchema = new Schema<TUser & TProfile>(
     profileId: {
       type: Schema.Types.ObjectId,
       ref: 'Profiles',
-      // required: true,
     },
     email: {
       type: String,

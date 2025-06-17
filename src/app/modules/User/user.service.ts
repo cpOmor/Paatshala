@@ -3,13 +3,13 @@ import { Profile, User } from './user.model';
 import { forbidden, notFound, serverError } from '../../utils/errorfunc';
 import { TProfile, TUser } from './user.interface';
 import { Schema, startSession } from 'mongoose';
-import { hashedPassword } from '../../utils/hashedPassword';
 import sendEmail from '../../utils/sendEmail';
 import { TEmailInfo } from '../../utils/utils.interface';
-import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
-import QueryBuilder from '../../builder/QueryBuilder';
-import { IMyRequest } from '../../utils/decoded';
 import { generateUniqueCode } from '../../utils/generateUniqueCode';
+import { IMyRequest } from '../../utils/decoded';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { hashedPassword } from '../../utils/hashedPassword';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
 // Get a single user
 const getUser = async (id: string) => {

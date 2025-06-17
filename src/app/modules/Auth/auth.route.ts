@@ -1,7 +1,5 @@
 import express from 'express';
-// import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
-// import { USER_ROLE } from '../User/user.constant';
 import { AuthControllers } from './auth.controller';
 import { AuthValidation } from './auth.validation';
 import auth from '../../middlewares/auth';
@@ -29,6 +27,9 @@ router.post(
 );
 
 // Route: Verify a user's account using a verification code
+// This is typically used after registration to confirm the user's email
+// code expire time is 5 minutes
+
 router.post(
   '/verification',
   // validateRequest(AuthValidation.verificationSchema), // Optional: Validate the verification request body
@@ -54,6 +55,8 @@ router.post(
 );
 
 // Route: Resend the account verification code
+// This is useful if the user did not receive the initial verification code
+// or if it has expired
 router.put(
   '/resend-verification-code',
   AuthControllers.verificationCodeReSend, // Controller resends a new verification code to the user

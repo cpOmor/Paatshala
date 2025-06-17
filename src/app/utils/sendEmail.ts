@@ -5,9 +5,8 @@ import { TEmailInfo } from './utils.interface';
 import { forbidden } from './errorfunc';
 
 const transporter = nodemailer.createTransport({
-  host: 'mail.skilliontech.com',
-  // host: 'smtp.gmail.com',
-  port: 465,
+  host: 'smtp.gmail.com',
+  port: 587,
   secure: true,
   auth: {
     user: config.smtp_mail,

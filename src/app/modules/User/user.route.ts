@@ -1,13 +1,15 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { UserControllers } from './user.controller';
 import auth from '../../middlewares/auth';
-import { upload } from '../../utils/sendImageToCloudinary';
 import { USER_ROLE } from './user.constant';
+import { upload } from '../../utils/sendImageToCloudinary';
 
 const router = express.Router();
 
 
 // Create a new user
+// This route is typically used for admin to create users
+// or for user registration
 router.post('/create-user', UserControllers.createUser);
 
 // Get a single user

@@ -23,12 +23,8 @@ export default {
   client_url: process.env.CLIENT_URL,
   server_url: process.env.SERVER_URL,
   smtp_password: process.env.SMTP_PASSWORD,
-  sslStorePass: process.env.SSL_STORE_PASS,
-  sslStoreId: process.env.SSL_STORE_ID,
-  pbAppId: process.env.FB_APP_ID,
-  pbPageId: process.env.FB_PAGE_ID,
-  pbAppSecret: process.env.FB_APP_SECRET,
-  pbAccessToken: process.env.FB_ACCESS_TOKEN,
+  smtp_host: process.env.SMTP_HOST,
+  smtp_post: process.env.SMTP_PORT,
 };
 
 export const jwt_access_expires_in = '31536000s';
