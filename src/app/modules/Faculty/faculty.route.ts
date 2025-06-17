@@ -4,20 +4,17 @@ import auth from '../../middlewares/auth';
 import { USER_ROLE } from '../Auth/auth.utils';
 
 const router = express.Router();
-
-// Create a new user
-// This route is typically used for admin to create users
-// or for user registration
+/**
+ * This route handles faculty creation.
+ * It expects a request body with faculty details (e.g., firstName, lastName, phone, email, image, password).
+ * If the faculty is created successfully, it returns the created faculty data.
+ */
 router.post('/create-faculty', FacultyControllers.createFaculty);
-
-// Get a single faculty member
-router.get(
-  '/faculty/:id',
-  auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher),
-  FacultyControllers.getFaculty,
-);
-
-// Get all users
+ 
+/**
+ * This route handles finding a faculty member.
+ * If the faculty member is found, it returns the faculty data.
+ */
 router.get(
   '/faculties',
   auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher),

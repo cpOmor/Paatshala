@@ -11,11 +11,10 @@ import { hashedPassword } from '../../utils/hashedPassword';
 import { USER_ROLE, UserStatus } from '../Auth/auth.utils';
 import { Profile, User } from '../User/user.model';
 import { TProfile, TUser } from '../User/user.interface';
+ 
 
-
-
-const getFaculties = async (req: IMyRequest) => {
-  const queryBuilder = new QueryBuilder(User.find({ role: USER_ROLE.teacher }).populate('profileId'), req.query)
+const getStudents = async (req: IMyRequest) => {
+  const queryBuilder = new QueryBuilder(User.find({ role: USER_ROLE.student }).populate('profileId'), req.query)
     .filter()
     .sort()
     .paginate()
@@ -36,7 +35,7 @@ const getFaculties = async (req: IMyRequest) => {
 };
 
 // Create a new user
-const createFaculty = async (payload: TUser & TProfile) => {
+const createStudent = async (payload: TUser & TProfile) => {
   const session = await startSession();
   session.startTransaction();
 
@@ -66,7 +65,7 @@ const createFaculty = async (payload: TUser & TProfile) => {
       profileId: userProfile[0]?._id as Schema.Types.ObjectId,
       email: payload.email as string,
       alterNumber: payload.alterNumber as string,
-      role: USER_ROLE.teacher,
+      role: USER_ROLE.student,
       password,
       rememberPassword: false,
       status: UserStatus.inProgress,
@@ -155,7 +154,7 @@ const createFaculty = async (payload: TUser & TProfile) => {
   }
 };
  
-export const FacultyServices = {
-  getFaculties,
-  createFaculty,
+export const StudentServices = {
+  getStudents,
+  createStudent,
 };

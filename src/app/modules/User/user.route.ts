@@ -5,13 +5,20 @@ import { upload } from '../../utils/sendImageToCloudinary';
 import { USER_ROLE } from '../Auth/auth.utils';
 
 const router = express.Router();
-
-// Create a new user
-// This route is typically used for admin to create users
-// or for user registration
+ /**
+  * This route handles user creation.
+  * It expects a request body with user details (e.g., firstName,lastName, phone, email, image, password, ).
+  * If the user is created successfully, it returns the created user data.
+  * It requires authentication with admin, student, or teacher roles.
+  * The request body should be in JSON format.
+  */
 router.post('/create-user', UserControllers.createUser);
 
-// Get a single user
+/**
+ * This route handles find user.
+ * It expects a request body with a params id.
+ * If the user is found, it returns the user data.
+ */
 router.get(
   '/user/:id',
   auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher),

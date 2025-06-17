@@ -2,13 +2,13 @@
 import httpStatus from 'http-status';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
-import { FacultyServices } from './faculty.service';
+import { StudentServices } from './student.service';
 
 
 
 // Create a new user
-const createFaculty = catchAsync(async (req, res) => {
-  const result = await FacultyServices.createFaculty(req.body);
+const createStudent = catchAsync(async (req, res) => {
+  const result = await StudentServices.createStudent(req.body);
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
@@ -16,11 +16,11 @@ const createFaculty = catchAsync(async (req, res) => {
     data: result,
   });
 });
-
+ 
 
 // Get all users
-const getFaculties = catchAsync(async (req: any, res) => {
-  const result = await FacultyServices.getFaculties(req as any);
+const getStudents = catchAsync(async (req: any, res) => {
+  const result = await StudentServices.getStudents(req as any);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -32,7 +32,7 @@ const getFaculties = catchAsync(async (req: any, res) => {
 });
 
 
-export const FacultyControllers = {
-  getFaculties,
-  createFaculty,
+export const StudentControllers = {
+  getStudents,
+  createStudent,
 };

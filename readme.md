@@ -137,6 +137,33 @@ http://localhost:5000/
 ```
 
 
+# Student APIs
+
+
+### user account create url
+##### POST method
+```bash
+{{base_url}}/student/create-student
+```
+
+#### Data 
+```bash
+{
+    "email": "",
+    "firstName": "",
+    "lastName": "",
+    "phone": "",
+    "alterNumber": "",
+    "password": ""
+}
+```
+
+### user account create url
+##### POST method
+```bash
+{{base_url}}/student/students
+```
+ 
 
 
 ### find all user
