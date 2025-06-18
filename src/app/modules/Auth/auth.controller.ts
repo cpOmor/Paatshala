@@ -91,7 +91,6 @@ const verification = catchAsync(async (req, res) => {
 const setNewPassword = catchAsync(async (req, res) => {
   const validation = await req.cookies.validation;
 
-  console.log('validation', validation);
 
   const result = await AuthServices.setNewPassword(
     validation,
@@ -146,6 +145,44 @@ const verificationForgetPassword = catchAsync(async (req, res) => {
   });
 });
 
+
+
+// Get a single user
+const getMe = catchAsync(async (req, res) => {
+  const result = await AuthServices.getMe(req?.user?.id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'My information  loaded.',
+    data: result,
+  });
+});
+
+
+// Update an existing user
+const updateMe = catchAsync(async (req, res) => {
+  const result = await AuthServices.updateMe(req);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User has been successfully updated.',
+    data: result,
+  });
+});
+
+
+
+// Delete a user
+const deleteMe = catchAsync(async (req, res) => {
+  const result = await AuthServices.deleteMe(req?.user?.id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User has been successfully deleted.',
+    data: result,
+  });
+});
+
 export const AuthControllers = {
   loginUser,
   logoutUser,
@@ -156,4 +193,7 @@ export const AuthControllers = {
   setNewPassword,
   verificationForgetPassword,
   verificationCodeReSend,
+  getMe,
+  updateMe,
+  deleteMe,
 };

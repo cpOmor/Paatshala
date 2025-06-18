@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose';
-import { TProfile, TUser } from './user.interface';
-import { USER_ROLE, UserStatus } from '../Auth/auth.utils';
+import { Schema, model } from 'mongoose'; 
+import { USER_ROLE, UserStatus } from './auth.utils';
+import { TProfile, TUser } from './auth.interface';
 
 const userSchema = new Schema<TUser & TProfile>(
   {

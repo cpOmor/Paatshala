@@ -1,5 +1,5 @@
 import mongoose, { ConnectOptions } from 'mongoose';
-import config from '.'; // Importing the configuration file where database URIs are defined
+import config from '.';
 
 
 /**
@@ -9,6 +9,7 @@ import config from '.'; // Importing the configuration file where database URIs 
  */
 export async function databaseConnecting() {
   try {
+  
     // Check if the production database URI is available
     if (config.mongo_prod as object | undefined) {
       // Connect to the production MongoDB database
@@ -18,7 +19,6 @@ export async function databaseConnecting() {
         serverSelectionTimeoutMS: 1000, // Timeout for selecting a MongoDB server
       } as ConnectOptions);
 
-    
       console.log('Database      :🚀 Connected to database (Production)');
     } else {
       // If production URI is not provided, connect to the development database

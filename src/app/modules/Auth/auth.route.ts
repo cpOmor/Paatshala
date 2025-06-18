@@ -1,9 +1,10 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import validateRequest from '../../middlewares/validateRequest';
 import { AuthControllers } from './auth.controller';
 import { AuthValidation } from './auth.validation';
 import auth from '../../middlewares/auth';
 import { USER_ROLE } from './auth.utils';
+import { upload } from '../../utils/sendImageToCloudinary';
 
 const router = express.Router();
 
@@ -105,6 +106,46 @@ router.put(
   auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher ),
   AuthControllers.changePassword,
 );
+
+
+
+/**
+ * This route handles getting the current user's information.
+ * It requires authentication with admin, student, or teacher roles.
+ * It returns the user's profile information, excluding sensitive data like verification status.
+ * The user data is restructured to include profile information directly in the response.
+ */
+router.get('/get-me', 
+  auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher), 
+  AuthControllers.getMe);
+
+
+/**
+ * This route allows authenticated users to update their profile information.
+ * It requires the user to be authenticated and have a valid role (admin, student, or teacher).
+ * It expects a request body with the updated user data, including profile information.
+ */
+router.put(
+  '/update-me',
+  upload.single('file'),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = JSON.parse(req.body.data);
+    next();
+  },
+  auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher),
+  AuthControllers.updateMe,
+);
+
+
+/**
+ * This route allows the delete of a user.
+ * It requires the user to be authenticated and have a valid role (admin, student, or teacher).
+ * It expects a request parameter with the user's ID to be deleted.
+ */
+router.delete('/delete-me', 
+  auth(USER_ROLE.admin, USER_ROLE.student, USER_ROLE.teacher), 
+AuthControllers.deleteMe);
+
 
 
 export const AuthRoutes = router;

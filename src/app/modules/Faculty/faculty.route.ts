@@ -21,4 +21,5 @@ router.get(
   FacultyControllers.getFaculties,
 );
 
+ 
 export const facultyRoutes = router;

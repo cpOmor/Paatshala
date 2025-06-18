@@ -8,9 +8,9 @@ import { generateUniqueCode } from '../../utils/generateUniqueCode';
 import { IMyRequest } from '../../utils/decoded';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { hashedPassword } from '../../utils/hashedPassword';
-import { USER_ROLE, UserStatus } from '../Auth/auth.utils';
-import { Profile, User } from '../User/user.model';
-import { TProfile, TUser } from '../User/user.interface';
+import { USER_ROLE, UserStatus } from '../Auth/auth.utils'; 
+import { Profile, User } from '../Auth/auth.model';
+import { TProfile, TUser } from '../Auth/auth.interface';
 
 
 

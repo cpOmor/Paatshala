@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import catchAsync from '../utils/catchAsync';
-import { forbidden, notFound, unauthorized } from '../utils/errorfunc';
-import { User } from '../modules/User/user.model';
+import { forbidden, notFound, unauthorized } from '../utils/errorfunc'; 
 import { TUserRole, UserStatus } from '../modules/Auth/auth.utils';
+import { User } from '../modules/Auth/auth.model';
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {

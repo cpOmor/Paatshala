@@ -9,15 +9,15 @@ import config, {
   jwt_refresh_expires_in,
 } from '../../config';
 import AppError from '../../errors/AppError';
-import { TLoginUser } from './auth.interface';
-import { forbidden, notFound } from '../../utils/errorfunc';
-import { Profile, User } from '../User/user.model';
-import { createToken, verifyToken } from '../../utils/utils';
-import { TProfile, TUser, TVerification } from '../User/user.interface';
+import { TLoginUser, TProfile, TUser, TVerification } from './auth.interface';
+import { forbidden, notFound, serverError } from '../../utils/errorfunc';
+import { createToken, verifyToken } from '../../utils/utils'; 
 import { generateUniqueCode } from '../../utils/generateUniqueCode';
 import { TEmailInfo } from '../../utils/utils.interface';
 import sendEmail from '../../utils/sendEmail';
 import { UserStatus } from './auth.utils';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
+import { Profile, User } from './auth.model';
 
 const loginUser = async (payload: TLoginUser) => {
   const user = await User.findOne({ email: payload.email }).select('+password');
@@ -513,6 +513,78 @@ const changePassword = async (req: any) => {
   );
 };
 
+
+const getMe = async (id: string) => {
+  const user = await User.findById(id)
+    .populate('profileId')
+    .select('-verification');
+
+  if (!user) {
+    throw notFound('No user found.');
+  }
+
+  // Destructure and reassemble the user data
+  const { profileId, email, ...restUserData } = user.toObject();
+
+  return { ...profileId, email, ...restUserData };
+};
+
+
+// Update an existing user
+const updateMe = async (req: any) => {
+  const id: string = req?.user?.id;
+  const payload: TUser & TProfile = req?.body;
+  const file: any = req?.file;
+
+  const isUser = (await User.findById(id).select('+password')) as TUser &
+    TProfile;
+
+  if (!isUser) {
+    throw notFound('No user found');
+  }
+
+  let profile = isUser.image;
+  if (file) {
+    try {
+      const result = await sendImageToCloudinary(file.filename, file.path);
+      profile = result.url as string;
+    } catch (error) {
+      throw serverError('Failed to upload the image.');
+    }
+  }
+
+  payload.image = profile;
+
+  await User.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+  const updatedUser = await Profile.findOneAndUpdate(
+    { email: isUser?.email },
+    payload,
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+  if (!updatedUser) {
+    throw forbidden('User update filled');
+  }
+  return updatedUser;
+};
+
+
+// Delete a user
+const deleteMe = async (id: string) => {
+  const deletedUser = await User.findByIdAndDelete(id);
+  if (!deletedUser) {
+    throw notFound('No user found.');
+  }
+  return deletedUser;
+};
+
+
+
 export const AuthServices = {
   loginUser,
   logoutUser,
@@ -523,4 +595,7 @@ export const AuthServices = {
   setNewPassword,
   verificationForgetPassword,
   verificationCodeReSend,
+  getMe,
+  updateMe,
+  deleteMe,
 };
