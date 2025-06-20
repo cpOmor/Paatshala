@@ -67,7 +67,7 @@ const refreshToken = catchAsync(async (req, res) => {
 });
 
 const forgerPassword = catchAsync(async (req, res) => {
-  const result = await AuthServices.forgerPassword(req.body.email as string);
+  const result = await AuthServices.forgerPassword(req as any, res as any);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -78,7 +78,7 @@ const forgerPassword = catchAsync(async (req, res) => {
 });
 
 const verification = catchAsync(async (req, res) => {
-  const result = await AuthServices.verification(req.body);
+  const result = await AuthServices.verification(req as any);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -89,12 +89,11 @@ const verification = catchAsync(async (req, res) => {
 });
 
 const setNewPassword = catchAsync(async (req, res) => {
-  const validation = await req.cookies.validation;
-
+  const validation = await req.cookies['verified-user'];
 
   const result = await AuthServices.setNewPassword(
     validation,
-    req.body.password,
+    req.body.password,req as any
   );
 
   sendResponse(res, {
@@ -117,7 +116,7 @@ const changePassword = catchAsync(async (req, res) => {
 
 // Create a new user
 const verificationCodeReSend = catchAsync(async (req, res) => {
-  const result = await AuthServices.verificationCodeReSend(req.body);
+  const result = await AuthServices.verificationCodeReSend(req.body, req as any);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

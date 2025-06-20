@@ -11,7 +11,7 @@ import config, {
 import AppError from '../../errors/AppError';
 import { TLoginUser, TProfile, TUser, TVerification } from './auth.interface';
 import { forbidden, notFound, serverError } from '../../utils/errorfunc';
-import { createToken, verifyToken } from '../../utils/utils'; 
+import { createToken, verifyToken } from '../../utils/utils';
 import { generateUniqueCode } from '../../utils/generateUniqueCode';
 import { TEmailInfo } from '../../utils/utils.interface';
 import sendEmail from '../../utils/sendEmail';
@@ -46,19 +46,13 @@ const loginUser = async (payload: TLoginUser) => {
     throw forbidden('Please provide the correct password.');
   }
 
-  
   const isProfile = await Profile.findOne({ email: user?.email });
 
-  
   if (isProfile === null) {
     throw forbidden('Something was wrong.');
   }
 
   await user.save();
-
-  
-
-  
 
   const jwtPayload = {
     email: user?.email,
@@ -68,8 +62,6 @@ const loginUser = async (payload: TLoginUser) => {
     id: user?._id,
     role: user?.role,
   };
-
-  
 
   const accessToken = createToken(
     jwtPayload,
@@ -172,21 +164,17 @@ const refreshToken = async (req: any, res: any) => {
     accessToken,
   };
 };
-
-const forgerPassword = async (email: string) => {
-  // checking if the user is exist
+const forgerPassword = async (req: any, res: any) => {
+  const { email } = req.body;
   const user: TUser | null = await User.findOne({ email });
   if (!user) {
     throw notFound('User not found!');
   }
 
-  const verification = user?.verification?.verification;
-
   // checking if the user is blocked
   const userStatus = user?.status;
-
   if (userStatus === UserStatus.blocked) {
-    throw forbidden('This use was blocked.');
+    throw forbidden('This user was blocked.');
   }
 
   const code = generateUniqueCode(6);
@@ -250,7 +238,6 @@ const forgerPassword = async (email: string) => {
     </table>
   </body>
 </html>
-
     `,
     subject: 'Verify OTP to Change Password',
   };
@@ -258,21 +245,55 @@ const forgerPassword = async (email: string) => {
   const sentMail = await sendEmail(emailData);
 
   const expired = new Date();
-  expired.setMinutes(expired.getMinutes() + 2);
-  // const sentMail = true;
+  expired.setMinutes(expired.getMinutes() + 5);
+
   if (sentMail) {
     await User.findOneAndUpdate(
       { email },
-      { verification: { code, verification, expired } },
+      { verification: { code, verification: false, expired } },
     );
+
+    // Generate JWT token for verification and set as cookie
+    const jwtPayload = {
+      email: user?.email,
+      id: user?._id,
+    };
+
+    const token = createToken(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      '5m',
+    );
+
+    res.cookie('forget-password-verification', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 5 * 60 * 1000, // 5 minutes
+      sameSite: 'strict',
+    });
   }
 
   return body;
 };
 
+const verification = async (req: any) => {
+  const code = req.body.code as string;
+  const cookie = req.cookies['forget-password-verification'];
 
-const verification = async (payload: TVerification) => {
-  const user = await User.findOne({ email: payload.email }).select(
+  if (!cookie) {
+    throw forbidden('Something went wrong!');
+  }
+  let decodedCookie: TVerification;
+  try {
+    decodedCookie = jwt.verify(
+      cookie,
+      config.jwt_access_secret as string,
+    ) as TVerification;
+  } catch (err) {
+    throw forbidden('Something went wrong!');
+  }
+
+  const user = await User.findOne({ email: decodedCookie.email }).select(
     'verification',
   );
 
@@ -284,7 +305,7 @@ const verification = async (payload: TVerification) => {
     throw forbidden('User already verified');
   }
 
-  if (!payload?.code) {
+  if (!code) {
     throw forbidden('Enter 6 digit code');
   }
 
@@ -292,15 +313,42 @@ const verification = async (payload: TVerification) => {
     throw forbidden('Expired . Please request a new code.');
   }
 
-  if (!(payload?.code === user?.verification?.code)) {
+  if (!(code === user?.verification?.code)) {
     throw forbidden('Oops! That’s not the right code');
   }
 
-  await User.findOneAndUpdate(
-    { email: payload.email },
-    { verification: { verification: true, code: payload?.code } },
+  const update = await User.findOneAndUpdate(
+    { email: decodedCookie.email },
+    { verification: { verification: true, code } },
   );
 
+  // Remove the 'forget-password-verification' cookie after successful verification
+  if (update) {
+    req.res.clearCookie('forget-password-verification', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    const jwtPayload = {
+      email: decodedCookie.email,
+      id: user?._id,
+      verified: true,
+    };
+
+    const token = createToken(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      '5m',
+    );
+
+    req.res.cookie('verified-user', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 5 * 60 * 1000, // 5 minutes
+      sameSite: 'strict',
+    });
+  }
   return;
 };
 
@@ -341,20 +389,20 @@ const verificationForgetPassword = async (payload: {
   const validation = createToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    '2m' as string,
+    '5m' as string,
   );
 
   return { validation };
 };
 
 // Resend verification code
-const verificationCodeReSend = async (payload: TUser & TProfile) => {
+const verificationCodeReSend = async (payload: TUser & TProfile, req : any) => {
   const code = generateUniqueCode(6);
   const expired = new Date();
-  expired.setMinutes(expired.getMinutes() + 2);
+  expired.setMinutes(expired.getMinutes() + 5);
 
   const newUserInfo = {
-    verification: { code, expired },
+    verification: { code, verification: false, expired },
   };
 
   const emailData: TEmailInfo = {
@@ -429,13 +477,35 @@ const verificationCodeReSend = async (payload: TUser & TProfile) => {
         runValidators: true,
       },
     );
+
     if (!updatedUser) {
       throw notFound('User update filled');
     }
+
+    if (updatedUser) {
+      // Generate JWT token for verification and set as cookie
+      const jwtPayload = {
+        email: payload?.email,
+      };
+
+      const token = createToken(
+        jwtPayload,
+        config.jwt_access_secret as string,
+        '5m',
+      );
+
+      req.res.cookie('forget-password-verification', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 5 * 60 * 1000, // 5 minutes
+        sameSite: 'strict',
+      });
+    }
+
     return;
   }
 };
-const setNewPassword = async (token: string, password: string) => {
+const setNewPassword = async (token: string, password: string, req: any) => {
   // Checking if the given token is valid
   const decoded = verifyToken(token, config.jwt_refresh_secret as string);
 
@@ -466,7 +536,7 @@ const setNewPassword = async (token: string, password: string) => {
   // Hash new password
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-  await User.findOneAndUpdate(
+  const updateUser = await User.findOneAndUpdate(
     {
       email: decoded.email,
     },
@@ -475,6 +545,16 @@ const setNewPassword = async (token: string, password: string) => {
       updateAt: new Date(),
     },
   );
+  if (updateUser) {
+    // Remove the 'verified-user' cookie after successful password update
+    // Assuming you have access to the response object, otherwise pass it as a parameter
+    // Example: setNewPassword = async (token: string, password: string, res: any) => { ... }
+    req.res.clearCookie('verified-user', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+  }
 
   return '';
 };
@@ -492,16 +572,13 @@ const changePassword = async (req: any) => {
     config.jwt_access_secret as string,
   ) as JwtPayload;
 
-
-
   //hash new password
   const hashedPassword = await bcrypt.hash(
     payload.newPassword,
     Number(config.bcrypt_salt_rounds),
   );
 
-
-// update user password
+  // update user password
   await User.findOneAndUpdate(
     {
       email: decoded.email,
@@ -512,7 +589,6 @@ const changePassword = async (req: any) => {
     },
   );
 };
-
 
 const getMe = async (id: string) => {
   const user = await User.findById(id)
@@ -528,7 +604,6 @@ const getMe = async (id: string) => {
 
   return { ...profileId, email, ...restUserData };
 };
-
 
 // Update an existing user
 const updateMe = async (req: any) => {
@@ -549,7 +624,7 @@ const updateMe = async (req: any) => {
       const result = await sendImageToCloudinary(file.filename, file.path);
       profile = result.url as string;
     } catch (error) {
-      throw serverError('Failed to upload the image.');
+      throw serverError(`Failed to upload the image. ${error instanceof Error ? error.message : ''}`);
     }
   }
 
@@ -573,7 +648,6 @@ const updateMe = async (req: any) => {
   return updatedUser;
 };
 
-
 // Delete a user
 const deleteMe = async (id: string) => {
   const deletedUser = await User.findByIdAndDelete(id);
@@ -582,8 +656,6 @@ const deleteMe = async (id: string) => {
   }
   return deletedUser;
 };
-
-
 
 export const AuthServices = {
   loginUser,

@@ -8,7 +8,7 @@ import { StudentServices } from './student.service';
 
 // Create a new user
 const createStudent = catchAsync(async (req, res) => {
-  const result = await StudentServices.createStudent(req.body);
+  const result = await StudentServices.createStudent(req.body, req);
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,

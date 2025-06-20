@@ -40,7 +40,7 @@ const userSchema = new Schema<TUser & TProfile>(
     verification: {
       code: { type: String },
       expired: { type: Date },
-      verification: { type: Boolean },
+      verification: { type: Boolean , default : false},
     },
     rememberPassword: {
       type: Boolean,

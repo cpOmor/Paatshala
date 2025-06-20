@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {  notFound } from '../../utils/errorfunc';
+import { notFound } from '../../utils/errorfunc';
 import { Schema, startSession } from 'mongoose';
 import sendEmail from '../../utils/sendEmail';
 import { TEmailInfo } from '../../utils/utils.interface';
@@ -11,10 +11,14 @@ import { hashedPassword } from '../../utils/hashedPassword';
 import { USER_ROLE, UserStatus } from '../Auth/auth.utils';
 import { Profile, User } from '../Auth/auth.model';
 import { TProfile, TUser } from '../Auth/auth.interface';
- 
+import { createToken } from '../../utils/utils';
+import config from '../../config';
 
 const getStudents = async (req: IMyRequest) => {
-  const queryBuilder = new QueryBuilder(User.find({ role: USER_ROLE.student }).populate('profileId'), req.query)
+  const queryBuilder = new QueryBuilder(
+    User.find({ role: USER_ROLE.student }).populate('profileId'),
+    req.query,
+  )
     .filter()
     .sort()
     .paginate()
@@ -35,7 +39,7 @@ const getStudents = async (req: IMyRequest) => {
 };
 
 // Create a new user
-const createStudent = async (payload: TUser & TProfile) => {
+const createStudent = async (payload: TUser & TProfile, req: any) => {
   const session = await startSession();
   session.startTransaction();
 
@@ -59,7 +63,7 @@ const createStudent = async (payload: TUser & TProfile) => {
     const userProfile = await Profile.create([newProfile], { session });
 
     const expired = new Date();
-    expired.setMinutes(expired.getMinutes() + 5); // Set expiration to 5 minutes from now
+    expired.setMinutes(expired.getMinutes() + 5);
 
     const newUserInfo: TUser = {
       profileId: userProfile[0]?._id as Schema.Types.ObjectId,
@@ -140,6 +144,28 @@ const createStudent = async (payload: TUser & TProfile) => {
       // User creation within the transaction
       await User.create([newUserInfo], { session });
 
+      req.res.clearCookie('forget-password-verification', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+
+      const jwtPayload = {
+        email: payload.email,
+      };
+
+      const token = createToken(
+        jwtPayload,
+        config.jwt_access_secret as string,
+        '5m',
+      );
+
+      req.res.cookie('forget-password-verification', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 5 * 60 * 1000, // 5 minutes
+        sameSite: 'strict',
+      });
       // Commit the transaction if email was successfully sent
       await session.commitTransaction();
     } else {
@@ -153,7 +179,7 @@ const createStudent = async (payload: TUser & TProfile) => {
     session.endSession();
   }
 };
- 
+
 export const StudentServices = {
   getStudents,
   createStudent,
